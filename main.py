@@ -1,12 +1,20 @@
+
 import os
+import spotipy
+
 from dotenv import load_dotenv
+from spotipy.oauth2 import SpotifyOAuth
 
 load_dotenv()
 
-client_id = os.getenv("SPOTIPY_CLIENT_ID")
-client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
-redirect_uri = os.getenv("SPOTIPY_REDIRECT_URI")
+sp = spotipy.Spotify(
+    auth_manager=SpotifyOAuth(
+        client_id=os.getenv("SPOTIPY_CLIENT_ID"),
+        client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
+        redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI"),
+        scope="user-library-read",
+        open_browser=True
+    )
+)
 
-print("Client ID loaded:", bool(client_id))
-print("Client Secret loaded:", bool(client_secret))
-print("Redirect URI loaded:", bool(redirect_uri))
+print("Successfully authenticated with Spotify!")
