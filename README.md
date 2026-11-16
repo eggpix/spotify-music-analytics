@@ -1,18 +1,31 @@
 # Spotify Music Analytics
 
-Get detailed analytics on Spotify listening history, top tracks and artists, and liked songs.
+Get detailed analytics on Spotify listening history, top tracks and artists, and liked songs. Store the result in a PostgreSQL database.
 
 ## Creating a Spotify App
 
 Before you begin, you must create a Spotify developer app. **You must have Spotify Premium to do this.** Go to [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard), log in and select "Create App". Set the redirect URI to `http://127.0.0.1:8888/callback`. Select "Web API" as the API type.
 
-Once your app is created, copy the client ID, client secret, and redirect URI into a new .env file. **Do not share these values with anyone. Your .env should remain in .gitignore if you are forking this project.**
+Once your app is created, copy the client ID, client secret, and redirect URI into a new .env file. **Do not share these values with anyone. Your .env should remain in .gitignore if you are forking this project.** Your .env file should look like this:
+
+```bash
+SPOTIPY_CLIENT_ID="your_client_id_here"
+SPOTIPY_CLIENT_SECRET="your_client_secret_here"
+SPOTIPY_REDIRECT_URI="http://127.0.0.1:8888/callback"
+```
 
 ## Python Imports
 
-Before using this project, you must install the following python modules:
+Before using this project, you must install the following Python modules:
+
 - spotipy
 - python-dotenv
+
+To install, run the following command in your Python terminal:
+
+```
+pip install spotipy python-dotenv
+```
 
 ## Setting up the Database
 
