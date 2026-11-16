@@ -1,3 +1,9 @@
+"""
+
+Run this file to retrieve all relavent data from the Spotify API and load it in your database.
+database name: spotify_music
+
+"""
 
 import os
 import psycopg2
