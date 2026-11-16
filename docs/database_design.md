@@ -22,7 +22,7 @@ This database is designed to store a Spotify user's liked songs, as well as thei
 | ----------- | ----------- | ------------------- |
 | id          | VARCHAR(22) | PK                  |
 | name        | TEXT        |                     |
-| duration    | INTEGER     |                     |
+| duration_ms | INTEGER     |                     |
 | album_id    | VARCHAR(22) | FK → albums.id      |
 
 ### albums
