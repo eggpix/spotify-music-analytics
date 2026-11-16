@@ -62,6 +62,7 @@ This database is designed to store a Spotify user's liked songs, as well as thei
 | Field        | Type        | Key                 |
 | ------------ | ----------- | ------------------- |
 | track_id     | VARCHAR(22) | PK FK → tracks.id   |
+| liked_at     | TIMESTAMPTZ |                     |
 
 ### recently_played
 
