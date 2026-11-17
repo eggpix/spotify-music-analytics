@@ -8,6 +8,8 @@ Spotify Music Analytics imports your saved tracks, listening history, and Spotif
 - A PostgreSQL database, either on your computer or hosted remotely
 - A Spotify developer app with the Spotify Web API enabled
 
+> Notice: Spotify now requires a Premium subscription to use Web API apps in developer mode.
+
 Install the Python dependencies from the repository root:
 
 ```bash
