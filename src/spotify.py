@@ -23,7 +23,8 @@ def connect():
             "user-library-read "
             "user-read-recently-played "
             "user-top-read"
-        )
+        ),
+        cache_path=".cache"
     ))
 
 

@@ -21,6 +21,10 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+      
+      - name: Restore Spotify authentication cache
+        run: |
+          echo '${{ secrets.SPOTIPY_CACHE }}' > .cache
 
       - name: Update listening history
         run: python src/main.py
