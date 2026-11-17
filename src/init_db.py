@@ -2,7 +2,7 @@ from pathlib import Path
 from database import connect
 
 def main():
-    schema_path = Path(__file__).parent / "sql/schema.sql"
+    schema_path = Path(__file__).parent.parent / "sql" / "schema.sql"
     schema = schema_path.read_text(encoding="utf-8")
 
     db = connect()
