@@ -1,3 +1,7 @@
+"""
+Initialize Database using schema file.
+"""
+
 from pathlib import Path
 from database import connect
 
