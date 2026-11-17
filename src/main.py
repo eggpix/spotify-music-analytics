@@ -130,13 +130,21 @@ def main():
     db = None
 
     try:
+        print("Connecting to Spotify...", flush=True)
         sp = spotify.connect()
+
+        print("Connecting to PostgreSQL...", flush=True)
         db = database.Database()
 
+        print("Connections established!", flush=True)
+
         if args.full:
+            print("Retrieving liked tracks...", flush=True)
             import_liked_tracks(sp, db)
+            print("Retrieving top tracks and artists...", flush=True)
             import_top_tracks_and_artists(sp, db)
 
+        print("Updating recently played...", flush=True)
         update_recently_played(sp, db)
 
         db.commit()

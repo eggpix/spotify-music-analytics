@@ -20,12 +20,12 @@ Before using this project, you must install the following Python modules:
 
 - spotipy
 - python-dotenv
-- psycopg
+- psycopg[binary]
 
 To install, run the following command in your Python terminal:
 
 ```
-pip install spotipy python-dotenv psycopg
+pip install spotipy python-dotenv psycopg[binary]
 ```
 
 ## Setting up the Database
