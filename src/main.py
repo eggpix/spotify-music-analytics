@@ -21,19 +21,16 @@ def import_liked_tracks(sp, db):
     """Import all liked tracks."""
 
     results = spotify.get_liked_tracks(sp)
-    total = 0
+    valid_items = [
+        item for item in results
+        if spotify.valid_track(item["track"])
+    ]
 
-    for item in results:
-        track = item["track"]
-
-        if not spotify.valid_track(track):
-            continue
-
-        db.insert_track(track)
-        total += db.insert_liked_track(
-            track["id"],
-            item["added_at"]
-        )
+    db.insert_tracks([item["track"] for item in valid_items])
+    total = db.insert_liked_tracks([
+        (item["track"]["id"], item["added_at"])
+        for item in valid_items
+    ])
 
     print(f"Imported {total} liked tracks.")
 
@@ -46,34 +43,30 @@ def import_top_tracks_and_artists(sp, db):
     for time_range in ("short_term", "medium_term", "long_term"):
 
         tracks = spotify.get_top_tracks(sp, time_range)
+        valid_tracks = [
+            (rank, track)
+            for rank, track in enumerate(tracks, start=1)
+            if spotify.valid_track(track)
+        ]
 
-        for rank, track in enumerate(tracks, start=1):
-            if not spotify.valid_track(track):
-                continue
-
-            db.insert_track(track)
-
-            db.insert_top_track(
-                track["id"],
-                time_range,
-                snapshot_at,
-                rank
-            )
+        db.insert_tracks([track for _, track in valid_tracks])
+        db.insert_top_tracks([
+            (track["id"], time_range, snapshot_at, rank)
+            for rank, track in valid_tracks
+        ])
 
         artists = spotify.get_top_artists(sp, time_range)
+        valid_artists = [
+            (rank, artist)
+            for rank, artist in enumerate(artists, start=1)
+            if artist.get("id")
+        ]
 
-        for rank, artist in enumerate(artists, start=1):
-            if not artist.get("id"):
-                continue
-
-            db.insert_artist(artist)
-
-            db.insert_top_artist(
-                artist["id"],
-                time_range,
-                snapshot_at,
-                rank
-            )
+        db.insert_artists([artist for _, artist in valid_artists])
+        db.insert_top_artists([
+            (artist["id"], time_range, snapshot_at, rank)
+            for rank, artist in valid_artists
+        ])
 
     print("Successfully imported top tracks and artists.")
 
@@ -94,20 +87,16 @@ def update_recently_played(sp, db):
 
     results = spotify.get_recently_played(sp, after=after)
 
-    total = 0
+    valid_items = [
+        item for item in results
+        if spotify.valid_track(item["track"])
+    ]
 
-    for item in results:
-        track = item["track"]
-
-        if not spotify.valid_track(track):
-            continue
-
-        db.insert_track(track)
-
-        total += db.insert_recently_played(
-            track["id"],
-            item["played_at"]
-        )
+    db.insert_tracks([item["track"] for item in valid_items])
+    total = db.insert_recently_played_many([
+        (item["track"]["id"], item["played_at"])
+        for item in valid_items
+    ])
 
     print(f"Imported {total} new listening events.")
 
