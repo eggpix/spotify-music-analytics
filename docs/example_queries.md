@@ -10,16 +10,16 @@ Retrieve the user's top artists (long term).
 
 Retrieve list of 10 recently played tracks.
 
-[View Query](../sql/recently_played)
+[View Query](../sql/recently_played.sql)
 
 ## Recently Played Artists
 
 Retrieve artists of recently played tracks.
 
-[View Query](../sql/recent_artists)
+[View Query](../sql/recent_artists.sql)
 
 ## Most Liked Artists
 
 Retrieve table of artists with most liked songs.
 
-[View Query](../sql/most_liked_artists)
+[View Query](../sql/most_liked_artists.sql)

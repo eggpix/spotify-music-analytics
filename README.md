@@ -33,4 +33,4 @@ Using PostgreSQL, set up a database called "spotify_music" using the [Schema SQL
 
 ## Getting the Data
 
-Run one of the [example queries](docs/example_queries.sql) in a client tool like pgAdmin to get information from your database.
+Run one of the [example queries](docs/example_queries.md) in a client tool like pgAdmin to get information from your database.
