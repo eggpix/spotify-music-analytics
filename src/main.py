@@ -73,7 +73,7 @@ def import_top_tracks_and_artists(sp, db):
     print("Successfully imported top tracks and artists.")
 
 
-def update_recently_played(sp, db):
+def import_recently_played(sp, db):
     """Import only recently played tracks not already in the database."""
 
     latest_played_at = db.get_latest_played_at()
@@ -154,7 +154,7 @@ def main():
 
         if args.recent or args.full:
             print("Updating recently played...", flush=True)
-            update_recently_played(sp, db)
+            import_recently_played(sp, db)
 
         db.commit()
         print("Database update completed successfully!")
