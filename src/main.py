@@ -1,166 +1,156 @@
+
 """
-Run this file to retrieve all relavent data from the Spotify API and load it in your database.
+Main application entry point.
+
+Usage:
+    python main.py          Update recently played tracks.
+    python main.py --full   Perform a complete initial import.
 """
 
-import os
-import psycopg
-import spotipy
+import argparse
+
+from datetime import datetime, timezone
 
 from dotenv import load_dotenv
-from getpass import getpass
-from datetime import datetime, timezone
-from spotipy.oauth2 import SpotifyOAuth
 
-load_dotenv()
-
-DATABASE_NAME = "spotify_music_analytics"
-
-# Spotify authentication
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-    client_id=os.getenv("SPOTIPY_CLIENT_ID"),
-    client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
-    redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI"),
-    scope="user-library-read user-read-recently-played user-top-read"
-))
-
-# PostgreSQL connection
-conn = psycopg.connect(
-    host="localhost",
-    database=DATABASE_NAME,
-    user="postgres",
-    password=getpass("PostgreSQL password: ")
-)
-
-cur = conn.cursor()
+import database
+import spotify
 
 
-def insert_artist(artist):
-    cur.execute("""
-        INSERT INTO artists (id, name)
-        VALUES (%s, %s)
-        ON CONFLICT (id) DO NOTHING
-    """, (artist["id"], artist["name"]))
+def import_liked_tracks(sp, db):
+    """Import all liked tracks."""
 
+    results = spotify.get_liked_tracks(sp)
+    total = 0
 
-def insert_track(track):
-    album = track["album"]
-
-    cur.execute("""
-        INSERT INTO albums (id, name, type)
-        VALUES (%s, %s, %s)
-        ON CONFLICT (id) DO NOTHING
-    """, (album["id"], album["name"], album["album_type"]))
-
-    for i, artist in enumerate(album["artists"]):
-        insert_artist(artist)
-        cur.execute("""
-            INSERT INTO album_artists (album_id, artist_id, artist_role)
-            VALUES (%s, %s, %s)
-            ON CONFLICT DO NOTHING
-        """, (album["id"], artist["id"],
-              "Primary" if i == 0 else "Featured"))
-
-    cur.execute("""
-        INSERT INTO tracks (id, name, duration_ms, album_id)
-        VALUES (%s, %s, %s, %s)
-        ON CONFLICT (id) DO NOTHING
-    """, (track["id"], track["name"],
-          track["duration_ms"], album["id"]))
-
-    for i, artist in enumerate(track["artists"]):
-        insert_artist(artist)
-        cur.execute("""
-            INSERT INTO track_artists (track_id, artist_id, artist_role)
-            VALUES (%s, %s, %s)
-            ON CONFLICT DO NOTHING
-        """, (track["id"], artist["id"],
-              "Primary" if i == 0 else "Featured"))
-
-
-# Retrieve liked songs
-results = sp.current_user_saved_tracks(limit=50)
-total_liked = 0
-
-while results:
-    for item in results["items"]:
+    for item in results:
         track = item["track"]
-        if not track or not track["id"] or not track["album"]["id"]:
+
+        if not spotify.valid_track(track):
             continue
 
-        insert_track(track)
+        db.insert_track(track)
+        total += db.insert_liked_track(
+            track["id"],
+            item["added_at"]
+        )
 
-        cur.execute("""
-            INSERT INTO liked_tracks (track_id, liked_at)
-            VALUES (%s, %s)
-            ON CONFLICT (track_id) DO NOTHING
-        """, (track["id"], item["added_at"]))
-
-        total_liked += 1
-
-    results = sp.next(results) if results["next"] else None
+    print(f"Imported {total} liked tracks.")
 
 
-# Retrieve recently played tracks
-results = sp.current_user_recently_played(limit=50)
-total_played = 0
+def import_top_tracks_and_artists(sp, db):
+    """Import top tracks and artists across all time ranges."""
 
-while results:
-    for item in results["items"]:
+    snapshot_at = datetime.now(timezone.utc)
+
+    for time_range in ("short_term", "medium_term", "long_term"):
+
+        tracks = spotify.get_top_tracks(sp, time_range)
+
+        for rank, track in enumerate(tracks, start=1):
+            if not spotify.valid_track(track):
+                continue
+
+            db.insert_track(track)
+
+            db.insert_top_track(
+                track["id"],
+                time_range,
+                snapshot_at,
+                rank
+            )
+
+        artists = spotify.get_top_artists(sp, time_range)
+
+        for rank, artist in enumerate(artists, start=1):
+            if not artist.get("id"):
+                continue
+
+            db.insert_artist(artist)
+
+            db.insert_top_artist(
+                artist["id"],
+                time_range,
+                snapshot_at,
+                rank
+            )
+
+    print("Successfully imported top tracks and artists.")
+
+
+def update_recently_played(sp, db):
+    """Import only recently played tracks not already in the database."""
+
+    latest_played_at = db.get_latest_played_at()
+
+    after = None
+
+    if latest_played_at:
+        # Include a small overlap to avoid missing boundary events.
+        after = max(
+            0,
+            int(latest_played_at.timestamp() * 1000) - 5000
+        )
+
+    results = spotify.get_recently_played(sp, after=after)
+
+    total = 0
+
+    for item in results:
         track = item["track"]
-        if not track or not track["id"] or not track["album"]["id"]:
+
+        if not spotify.valid_track(track):
             continue
 
-        insert_track(track)
+        db.insert_track(track)
 
-        cur.execute("""
-            INSERT INTO recently_played (track_id, played_at)
-            VALUES (%s, %s)
-            ON CONFLICT DO NOTHING
-        """, (track["id"], item["played_at"]))
+        total += db.insert_recently_played(
+            track["id"],
+            item["played_at"]
+        )
 
-        total_played += 1
-
-    results = sp.next(results) if results["next"] else None
+    print(f"Imported {total} new listening events.")
 
 
-# Retrieve top tracks and artists
-snapshot_at = datetime.now(timezone.utc)
+def main():
+    load_dotenv()
 
-for time_range in ("short_term", "medium_term", "long_term"):
-
-    results = sp.current_user_top_tracks(
-        limit=50, time_range=time_range
+    parser = argparse.ArgumentParser(
+        description="Spotify Music Analytics data importer."
     )
 
-    for rank, track in enumerate(results["items"], start=1):
-        insert_track(track)
-
-        cur.execute("""
-            INSERT INTO top_tracks
-                (track_id, time_range, retrieved_at, rank)
-            VALUES (%s, %s, %s, %s)
-            ON CONFLICT DO NOTHING
-        """, (track["id"], time_range, snapshot_at, rank))
-
-    results = sp.current_user_top_artists(
-        limit=50, time_range=time_range
+    parser.add_argument(
+        "--full",
+        action="store_true",
+        help="Import liked tracks, top tracks, top artists, and recent plays."
     )
 
-    for rank, artist in enumerate(results["items"], start=1):
-        insert_artist(artist)
+    args = parser.parse_args()
 
-        cur.execute("""
-            INSERT INTO top_artists
-                (artist_id, time_range, retrieved_at, rank)
-            VALUES (%s, %s, %s, %s)
-            ON CONFLICT DO NOTHING
-        """, (artist["id"], time_range, snapshot_at, rank))
+    db = None
+
+    try:
+        sp = spotify.connect()
+        db = database.Database()
+
+        if args.full:
+            import_liked_tracks(sp, db)
+            import_top_tracks_and_artists(sp, db)
+
+        update_recently_played(sp, db)
+
+        db.commit()
+        print("Database update completed successfully!")
+
+    except Exception:
+        if db:
+            db.rollback()
+        raise
+
+    finally:
+        if db:
+            db.close()
 
 
-conn.commit()
-cur.close()
-conn.close()
-
-print(f"Successfully processed {total_liked} liked tracks!")
-print(f"Successfully processed {total_played} recently played tracks!")
-print("Successfully retrieved top tracks and artists!")
+if __name__ == "__main__":
+    main()

@@ -30,7 +30,13 @@ pip install spotipy python-dotenv psycopg
 
 ## Setting up the Database
 
-Using PostgreSQL, set up a database called "spotify_music_analytics" using the [Schema SQL file](sql/schema.sql) to initialize tables. Information on the database design can be found in [database_design.md](docs/database_design.md). Once the database is set up, you can run [main.py](src/main.py) and fill the tables with data.
+### Locally
+
+Using PostgreSQL, set up a database called "spotify_music_analytics" using the [Schema SQL file](sql/schema.sql) to initialize tables. Information on the database design can be found in [database_design.md](docs/database_design.md). Once the database is set up, you can run [main.py](src/main.py) and fill the tables with data. For a full initial data fill, run `python src/main.py --full`.
+
+### Via a Remote Database
+
+Follow the same instructions for the local database, but add `DATABASE_URL=your_connection_url_here` to your .env file to link to your remote database.
 
 ## Getting the Data
 
