@@ -1,8 +1,8 @@
-# Spotify Liked Songs Database Design
+# Spotify Music Analytics Database Design
 
 ## Purpose
 
-This database is designed to store a Spotify user's liked songs, as well as their relevant track information
+This database is designed to store a Spotify user's liked songs, recently played songs, and top artists and tracks, as well as any relevant information such as album information.
 
 ## Entities
 
@@ -90,9 +90,20 @@ This database is designed to store a Spotify user's liked songs, as well as thei
 | rank         | INTEGER     |                     |
 
 ## Relationships
-- A track must belong to one or more artists.
-- An artist may be associated with zero or more tracks.
-- An album must belong to one or more artists.
-- An artist may be associated with zero or more albums.
-- An album must contain one or more tracks.
-- A track must belong to exactly one album.
+
+The data model uses junction tables to represent many-to-many relationships and to preserve artist roles.
+
+- A track can be associated with zero or more artists through `track_artists`.
+- An artist can be associated with zero or more tracks through `track_artists`.
+- An album can be associated with zero or more artists through `album_artists`.
+- An artist can be associated with zero or more albums through `album_artists`.
+- An album can contain one or more tracks.
+- Each track belongs to exactly one album via `tracks.album_id -> albums.id`.
+- Each `track_artists` row links one track to one artist and records that artist's role for that track.
+- Each `album_artists` row links one album to one artist and records that artist's role for that album.
+
+In summary, the schema is:
+
+- `tracks` to `albums`: many-to-one
+- `tracks` to `artists`: many-to-many via `track_artists`
+- `albums` to `artists`: many-to-many via `album_artists`
