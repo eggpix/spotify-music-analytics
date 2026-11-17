@@ -4,11 +4,19 @@ Handles Spotify authentication and API requests.
 """
 
 import os
+import json
 
 import spotipy
 from dotenv import load_dotenv
-from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import SpotifyOAuth, CacheHandler
 
+class EnvironmentCacheHandler(CacheHandler):
+    def get_cached_token(self):
+        cache = os.getenv("SPOTIPY_CACHE")
+        return json.loads(cache) if cache else None
+
+    def save_token_to_cache(self, token_info):
+        pass
 
 def connect():
     """Authenticate and return a Spotify client."""
@@ -24,7 +32,7 @@ def connect():
             "user-read-recently-played "
             "user-top-read"
         ),
-        cache_path=".cache"
+        cache_handler=EnvironmentCacheHandler()
     ))
 
 
