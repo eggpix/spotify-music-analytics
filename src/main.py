@@ -3,7 +3,7 @@ Run this file to retrieve all relavent data from the Spotify API and load it in 
 """
 
 import os
-import psycopg2
+import psycopg
 import spotipy
 
 from dotenv import load_dotenv
@@ -24,7 +24,7 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
 ))
 
 # PostgreSQL connection
-conn = psycopg2.connect(
+conn = psycopg.connect(
     host="localhost",
     database=DATABASE_NAME,
     user="postgres",
