@@ -1,4 +1,5 @@
--- Spotify Liked Songs Database
+-- spotify_music_analytics Database Schema
+-- Run these queries to initialize the requied tables for the database
 
 CREATE TABLE artists (
     id VARCHAR(22) PRIMARY KEY,
