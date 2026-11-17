@@ -1,4 +1,3 @@
-
 """
 Handles all PostgreSQL database connections and operations.
 """

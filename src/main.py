@@ -1,10 +1,12 @@
-
 """
 Main application entry point.
 
 Usage:
-    python main.py          Update recently played tracks.
-    python main.py --full   Perform a complete initial import.
+    python main.py            Runs full data import (identical to python main.py --full).
+    python main.py --full     Perform a complete initial import.
+    python main.py --liked    Insert liked songs data
+    python main.py --top      Insert top artists and tracks
+    python main.py --recent   Insert recent tracks
 """
 
 import argparse
@@ -113,6 +115,21 @@ def main():
         action="store_true",
         help="Import liked tracks, top tracks, top artists, and recent plays."
     )
+    parser.add_argument(
+        "--liked",
+        action="store_true",
+        help="Import liked tracks for current user."
+    )
+    parser.add_argument(
+        "--top",
+        action="store_true",
+        help="Import top tracks and top artists for current user."
+    )
+    parser.add_argument(
+        "--recent",
+        action="store_true",
+        help="Import recent tracks for current user."
+    )
 
     args = parser.parse_args()
 
@@ -127,14 +144,17 @@ def main():
 
         print("Connections established!", flush=True)
 
-        if args.full:
+        if args.liked or args.full:
             print("Retrieving liked tracks...", flush=True)
             import_liked_tracks(sp, db)
+
+        if args.top or args.full:
             print("Retrieving top tracks and artists...", flush=True)
             import_top_tracks_and_artists(sp, db)
 
-        print("Updating recently played...", flush=True)
-        update_recently_played(sp, db)
+        if args.recent or args.full:
+            print("Updating recently played...", flush=True)
+            update_recently_played(sp, db)
 
         db.commit()
         print("Database update completed successfully!")

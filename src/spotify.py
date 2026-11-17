@@ -1,4 +1,3 @@
-
 """
 Handles Spotify authentication and API requests.
 """
