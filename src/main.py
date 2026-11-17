@@ -1,8 +1,5 @@
 """
-
 Run this file to retrieve all relavent data from the Spotify API and load it in your database.
-database name: spotify_music
-
 """
 
 import os
@@ -16,6 +13,8 @@ from spotipy.oauth2 import SpotifyOAuth
 
 load_dotenv()
 
+DATABASE_NAME = "spotify_music_analytics"
+
 # Spotify authentication
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     client_id=os.getenv("SPOTIPY_CLIENT_ID"),
@@ -27,7 +26,7 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
 # PostgreSQL connection
 conn = psycopg2.connect(
     host="localhost",
-    database="spotify_music",
+    database=DATABASE_NAME,
     user="postgres",
     password=getpass("PostgreSQL password: ")
 )
