@@ -144,6 +144,9 @@ def main():
 
         print("Connections established!", flush=True)
 
+        if not any((args.full, args.liked, args.top, args.recent)):
+            args.full= True
+
         if args.liked or args.full:
             print("Retrieving liked tracks...", flush=True)
             import_liked_tracks(sp, db)

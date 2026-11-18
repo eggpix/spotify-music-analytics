@@ -1,5 +1,4 @@
-SELECT 
-    tracks.name AS track,
+SELECT tracks.name AS track,
     albums.name AS album,
     recently_played.played_at AS time
 FROM recently_played

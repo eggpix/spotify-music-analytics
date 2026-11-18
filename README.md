@@ -68,12 +68,15 @@ Run commands from the repository root:
 python src/main.py
 ```
 
-This updates recently played tracks. The importer checks the latest saved play time and requests newer plays, with a small overlap to avoid missing events at the boundary. Repeated records are ignored by the database's conflict handling.
+This runs a full data import on liked songs, recent plays, and top tracks and artists. All repeats are removed according to the database scema.
 
-For a fuller initial import, run:
+Additional individual updates are found below:
 
 ```bash
-python src/main.py --full
+    python src/main.py --full     Perform a complete initial import.
+    python src/main.py --liked    Insert liked songs data
+    python src/main.py --top      Insert top artists and tracks
+    python src/main.py --recent   Insert recent tracks
 ```
 
 This imports saved (liked) tracks, snapshots of your top tracks and artists for Spotify's short-, medium-, and long-term ranges, and recently played tracks. The top-track and top-artist snapshots include their retrieval time and rank. The normal run does not refresh saved tracks or top lists; use `--full` when you want to collect those again.
