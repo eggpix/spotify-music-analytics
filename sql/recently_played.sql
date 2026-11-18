@@ -7,5 +7,5 @@ LEFT JOIN tracks
     ON tracks.id = recently_played.track_id
 LEFT JOIN albums
     ON albums.id = tracks.album_id
-ORDER BY time
-DESC LIMIT 50;
+ORDER BY time DESC
+LIMIT 50;
