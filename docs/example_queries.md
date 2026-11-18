@@ -8,15 +8,9 @@ Retrieve the user's top artists (long term).
 
 ## Recently Played Tracks
 
-Retrieve list of 10 recently played tracks.
+Retrieve list of 50 recently played tracks. As of November 2026, Spotify appears to only log songs listened to completion, so keep that in mind when using this query.
 
 [View Query](../sql/recently_played.sql)
-
-## Recently Played Artists
-
-Retrieve artists of recently played tracks.
-
-[View Query](../sql/recent_artists.sql)
 
 ## Most Liked Artists
 
