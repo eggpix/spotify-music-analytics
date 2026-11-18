@@ -22,6 +22,11 @@ def connect():
 
     load_dotenv()
 
+    # Use custom environment handler only if SPOTIPY_CACHE
+    # exists in the environment variables
+    cache = os.getenv("SPOTIPY_CACHE")
+    cache_handler = (EnvironmentCacheHandler() if cache else None)
+
     return spotipy.Spotify(auth_manager=SpotifyOAuth(
         client_id=os.getenv("SPOTIPY_CLIENT_ID"),
         client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
@@ -31,9 +36,8 @@ def connect():
             "user-read-recently-played "
             "user-top-read"
         ),
-        cache_handler=EnvironmentCacheHandler()
+        cache_handler=cache_handler
     ))
-
 
 def get_all_pages(sp, results):
     """Retrieve all pages of a paginated Spotify response."""
